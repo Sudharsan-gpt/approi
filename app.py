@@ -155,8 +155,92 @@ for month in range(1, months + 1):
 
 df = pd.DataFrame(data)
 
-# KPI Metrics and Charts + Table
-# (The enhancement section already contains formatted KPIs, charts, and styled table)
+# Compute KPIs
+fuel_savings_mt = df["Cumulative Savings"].iloc[-1] / fuel_price
+co2_reduction = fuel_savings_mt * CO2_EMISSION_FACTOR
 
-# Now include the enhancement section (already present above)
-# It will use the df, total_fuel_mt, fuel_savings_mt, etc., from this calculation
+# Define formatter and chart helper
+format_number = lambda x: f"{x/1_000_000:.1f}M" if x >= 1_000_000 else f"{x/1_000:.1f}k" if x >= 1_000 else f"{x:,.0f}"
+def smooth_line(x, y):
+    xnew = np.linspace(min(x), max(x), 300)
+    spl = make_interp_spline(x, y, k=3)
+    ynew = spl(xnew)
+    return xnew, ynew
+
+def highlight_profit(val): return 'color: green;' if val > 0 else 'color: red;'
+def highlight_roi(val):
+    try:
+        return 'color: green;' if float(val.strip('%')) > 0 else 'color: red;'
+    except:
+        return ''
+
+# KPI Display
+st.markdown("### 📊 Key Metrics")
+col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+col1.metric("\U0001f6a2 Fuel Savings (MT)", format_number(fuel_savings_mt))
+col2.metric("\U0001f4b5 Cost Savings ($)", format_number(df['Fuel Cost Savings'].sum()))
+col3.metric("\U0001f331 CO₂ Reduction (kg)", format_number(co2_reduction))
+col4.metric("\U0001f4b0 Profit ($)", format_number(df['Profit'].iloc[-1]))
+col5.metric("\U0001f4c8 ROI", df['Cumulative ROI'].iloc[-1])
+col6.metric("\U0001f4bc Total Investment Cost ($)", format_number(df['Cumulative Total Cost'].iloc[-1]))
+col7.metric("\u26fd Total Fuel Used (MT)", format_number(total_fuel_mt))
+
+# Charts Overview
+st.markdown("""
+#### 🔍 Charts Overview
+- **Investment, Savings, Profit**: Visualizes how cumulative costs, savings, and profit evolve over time.
+- **ROI % Trend**: Monthly return on investment as a smooth curve.
+- **Savings vs Cost**: Final total savings compared to total investment.
+""")
+
+# Charts
+st.markdown("### 📈 Trends")
+col_chart1, col_chart2, col_chart3 = st.columns(3)
+colors = list(mcolors.TABLEAU_COLORS.values())
+
+with col_chart1:
+    x = df['Month']
+    fig1, ax1 = plt.subplots(figsize=(4.5, 3.5))
+    for y, color, label in zip([df['Cumulative Total Cost'], df['Cumulative Savings'], df['Profit']],
+                               ["#cfd8dc", "#a5d6a7", "#ffe082"], ['Total Cost', 'Savings', 'Profit']):
+        xs, ys = smooth_line(x, y)
+        ax1.plot(xs, ys, color=color, label=label)
+        ax1.fill_between(xs, ys, color=color, alpha=0.4)
+    ax1.set_title("Investment, Savings, Profit")
+    ax1.legend()
+    ax1.grid(False)
+    st.pyplot(fig1)
+
+with col_chart2:
+    roi_vals = [float(r.strip('%')) for r in df["Cumulative ROI"]]
+    xs, ys = smooth_line(df["Month"], roi_vals)
+    fig2, ax2 = plt.subplots(figsize=(4.5, 3.5))
+    ax2.plot(xs, ys, color="#90caf9", label="ROI %")
+    ax2.fill_between(xs, ys, color="#90caf9", alpha=0.4)
+    ax2.set_title("ROI % Trend")
+    ax2.grid(False)
+    st.pyplot(fig2)
+
+with col_chart3:
+    fig3, ax3 = plt.subplots(figsize=(4.5, 3.5))
+    ax3.bar(["Savings", "Cost"],
+            [df['Cumulative Savings'].iloc[-1], df['Cumulative Total Cost'].iloc[-1]],
+            color=["#81c784", "#ef9a9a"], alpha=0.8)
+    ax3.set_title("Total Savings vs Cost")
+    ax3.grid(False)
+    st.pyplot(fig3)
+
+# Table
+st.markdown("### 📋 Monthly Table")
+styled_df = df.style.set_properties(**{
+    'border-color': 'lightgray',
+    'border-style': 'solid',
+    'border-width': '1px'
+}).applymap(highlight_profit, subset=['Profit']) \
+  .applymap(highlight_roi, subset=['Cumulative ROI']) \
+  .set_table_styles([
+    {'selector': 'th', 'props': [('font-weight', 'bold'), ('background-color', '#dee2e6')]},
+    {'selector': 'tr:nth-child(even)', 'props': [('background-color', '#f9f9f9')]}
+])
+
+st.dataframe(styled_df, use_container_width=True, height=500)
