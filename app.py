@@ -55,8 +55,8 @@ with col1:
 with col2:
     saving_hull = st.select_slider("Hull & Performance Saving (%)", options=np.arange(0, 6, 0.1), value=2.0)
     saving_voyage = st.select_slider("Voyage Optimization Saving (%)", options=np.arange(0, 6, 0.1), value=1.0)
-    saving_emission = st.select_slider("Emission App Avoidance (%)", options=np.arange(0, 6, 0.1), value=0.5)
-    saving_scorecard = st.select_slider("Scorecard Avoidance (%)", options=np.arange(0, 6, 0.1), value=0.2)
+    saving_emission = st.select_slider("Emission Cost Avoidance (%)", options=np.arange(0, 6, 0.1), value=0.5)
+    saving_scorecard = st.select_slider("Scorecard Cost Avoidance (%)", options=np.arange(0, 6, 0.1), value=0.2)
     saving_propulsion = st.select_slider("Propulsion Pro Saving (%)", options=np.arange(0, 6, 0.1), value=0.0)
 
 with col3:
