@@ -57,14 +57,14 @@ with col2:
     saving_voyage = st.select_slider("Voyage Optimization Saving (%)", options=np.arange(0, 6, 0.1), value=1.0)
     saving_emission = st.select_slider("Emission App Avoidance (%)", options=np.arange(0, 6, 0.1), value=0.5)
     saving_scorecard = st.select_slider("Scorecard Avoidance (%)", options=np.arange(0, 6, 0.1), value=0.2)
-    saving_propulsion = st.select_slider("Propulsion Saving (%)", options=np.arange(0, 6, 0.1), value=0.0)
+    saving_propulsion = st.select_slider("Propulsion Pro Saving (%)", options=np.arange(0, 6, 0.1), value=0.0)
 
 with col3:
     cost_hull = st.number_input("Hull App Cost ($)", value=250.0)
     cost_voyage = st.number_input("Voyage App Cost ($)", value=250.0)
     cost_emission = st.number_input("Emission App Cost ($)", value=250.0)
     cost_scorecard = st.number_input("Scorecard App Cost ($)", value=250.0)
-    cost_propulsion = st.number_input("Propulsion App Cost ($)", value=0.0)
+    cost_propulsion = st.number_input("Propulsion Pro App Cost ($)", value=0.0)
     initial_sub_cost = sum([cost_hull, cost_voyage, cost_emission, cost_scorecard, cost_propulsion])
 
 with col4:
@@ -149,7 +149,7 @@ st.markdown("### 📊 Key Metrics")
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 col1.metric("🚢 Fuel Savings (MT)", fmt(fuel_savings_mt))
 col2.metric("💵 Cost Savings ($)", fmt(df["Fuel Cost Savings"].sum()))
-col3.metric("🌱 CO₂ Reduction (kg)", fmt(co2_reduction))
+col3.metric("🌱 CO₂ Reduction (MT)", fmt(co2_reduction))
 col4.metric("💰 Profit ($)", fmt(df["Profit"].iloc[-1]))
 col5.metric("📈 ROI", df["Cumulative ROI"].iloc[-1])
 col6.metric("💼 Total Investment Cost ($)", fmt(df["Cumulative Total Cost"].iloc[-1]))
